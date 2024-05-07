@@ -13,51 +13,48 @@ struct ContentView: View {
     }
 }
 
-struct InfiniteScrollView: View {
-    @State private var isVisible = false
+struct IconView: View {
+    let systemName: String = "play.fill"
+    let color: Color
     
     var body: some View {
-        VStack() {
+        Image(systemName: systemName)
+            .resizable()
+//            .frame(width: 25, height: 25)
+            .foregroundColor(color)
+    }
+}
+
+struct InfiniteScrollView: View {
+    @State var icons: [IconView] = [
+        IconView(color: .blue),
+        IconView(color: .red),
+        IconView(color: .green)
+    ]
+    
+    @State private var isVisible = [false, true, true]
+    
+    private let transitions: [AnyTransition] = [
+        .move(edge: .leading).combined(with: .scale).combined(with: .opacity), // Для первой иконки
+        .move(edge: .trailing), // Для второй иконки
+        .move(edge: .trailing).combined(with: .scale).combined(with: .opacity) // Для третьей иконки
+    ]
+    
+    var body: some View {
+        VStack {
             HStack(spacing: 0) {
-                if !isVisible {
-                    Image(systemName: "play.fill")
-                        .resizable()
-                        .frame(width: 25, height: 25)
-                        .foregroundStyle(.red)
-                        .offset(x: -12.5)
-                        .transition(
-                            .move(edge: .leading)
-                            .combined(with: .scale)
-                            .combined(with: .opacity)
-                        )
-                }
-                if isVisible {
-                    Image(systemName: "play.fill")
-                        .resizable()
-                        .frame(width: 25, height: 25)
-                        .foregroundStyle(.tint)
-                        .transition(
-                            .move(edge: .trailing)
-                        )
-                }
-                if isVisible {
-                    Image(systemName: "play.fill")
-                        .resizable()
-                        .frame(width: 25, height: 25)
-                        .foregroundStyle(.tint)
-                        .transition(
-                            .move(edge: .trailing)
-                            .combined(with: .scale)
-                            .combined(with: .opacity)
-                        )
+                ForEach(icons.indices) { index in
+                    if self.isVisible[index] {
+                        self.icons[index]
+                            .transition(self.transitions[index])
+                    }
                 }
             }
             .frame(width: 50, height: 30)
-            .border(.purple, width: 2.0)
-            
+            .border(Color.purple, width: 1.0)
             Button(action: {
                 withAnimation {
-                    self.isVisible.toggle()
+                    self.shiftIcons()
                 }
             }) {
                 Text("Анимировать")
@@ -67,9 +64,15 @@ struct InfiniteScrollView: View {
                     .cornerRadius(10)
             }
         }
-        .animation(.smooth, value: isVisible)
+        .animation(.smooth) // Устанавливаем анимацию для всего VStack
+    }
+    
+    func shiftIcons() {
+        let lastIcon = icons.removeLast()
+        icons.insert(lastIcon, at: 0)
     }
 }
+
 
 #Preview {
     ContentView()
