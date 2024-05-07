@@ -8,70 +8,37 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isClicked = false
     var body: some View {
-        InfiniteScrollView()
-    }
-}
-
-struct IconView: View {
-    let systemName: String = "play.fill"
-    let color: Color
-    
-    var body: some View {
-        Image(systemName: systemName)
-            .resizable()
-            .foregroundColor(color)
-    }
-}
-
-struct InfiniteScrollView: View {
-    @State var icons: [IconView] = [
-        IconView(color: .blue),
-        IconView(color: .red),
-        IconView(color: .green)
-    ]
-    
-    @State private var visibles = [false, true, true]
-    
-    private let transitions: [AnyTransition] = [
-        .move(edge: .leading).combined(with: .scale).combined(with: .opacity), // Для первой иконки
-        .move(edge: .trailing), // Для второй иконки
-        .move(edge: .trailing).combined(with: .scale).combined(with: .opacity) // Для третьей иконки
-    ]
-    
-    var body: some View {
-        VStack {
-            HStack(spacing: 0) {
-                ForEach(icons.indices) { index in
-                    if self.visibles[index] {
-                        self.icons[index]
-                            .transition(self.transitions[index])
-                    }
-                }
-            }
-            .frame(width: 50, height: 30)
-            .border(Color.purple, width: 1.0)
+        VStack{
+            button
             Button(action: {
-                withAnimation {
-                    self.shiftIcons()
+                withAnimation{
+                    isClicked = true
                 }
-            }) {
-                Text("Анимировать")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+            completion:{
+                isClicked = false
             }
+            }, label: {
+                HStack(spacing: .zero) {
+                    Image(systemName: "play.fill")
+                        .resizable()
+                        .frame(width: isClicked ? 50 : 0, height: isClicked ? 50 : 0)
+                        .opacity(isClicked ? 1 : 0)
+                    
+                    Image(systemName: "play.fill")
+                        .resizable()
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: "play.fill")
+                        .resizable()
+                        .frame(width: isClicked ? 1 : 50, height: isClicked ? 1 : 50)
+                        .opacity(isClicked ? 0 : 1)
+                }
+            })
         }
-        .animation(.smooth) // Устанавливаем анимацию для всего VStack
-    }
-    
-    func shiftIcons() {
-        let lastIcon = icons.removeLast()
-        icons.insert(lastIcon, at: 0)
     }
 }
-
 
 #Preview {
     ContentView()
