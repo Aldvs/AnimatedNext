@@ -20,7 +20,6 @@ struct IconView: View {
     var body: some View {
         Image(systemName: systemName)
             .resizable()
-//            .frame(width: 25, height: 25)
             .foregroundColor(color)
     }
 }
@@ -32,7 +31,7 @@ struct InfiniteScrollView: View {
         IconView(color: .green)
     ]
     
-    @State private var isVisible = [false, true, true]
+    @State private var visibles = [false, true, true]
     
     private let transitions: [AnyTransition] = [
         .move(edge: .leading).combined(with: .scale).combined(with: .opacity), // Для первой иконки
@@ -44,7 +43,7 @@ struct InfiniteScrollView: View {
         VStack {
             HStack(spacing: 0) {
                 ForEach(icons.indices) { index in
-                    if self.isVisible[index] {
+                    if self.visibles[index] {
                         self.icons[index]
                             .transition(self.transitions[index])
                     }
