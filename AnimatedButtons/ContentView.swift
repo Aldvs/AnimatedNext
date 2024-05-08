@@ -8,35 +8,63 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var isClicked = false
     var body: some View {
-        VStack{
-            Button(action: {
-                withAnimation(Animation.smooth(duration: 0.5, extraBounce: 0.5)){
-                    isClicked = true
-                }
-            completion:{
-                isClicked = false
-            }
-            }) {
-                HStack(spacing: .zero) {
-                    Image(systemName: "play.fill")
-                        .resizable()
-                        .frame(width: isClicked ? 50 : 0, height: isClicked ? 50 : 0)
-                        .opacity(isClicked ? 1 : 0)
-                    Image(systemName: "play.fill")
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                    Image(systemName: "play.fill")
-                        .resizable()
-                        .frame(width: isClicked ? 1 : 50, height: isClicked ? 1 : 50)
-                        .opacity(isClicked ? 0 : 1)
-                }
-            }
-        }
+        InfiniteScrollView()
     }
 }
+struct IconView: View {
+    let systemName: String = "play.fill"
+    let color: Color
+    
+    var body: some View {
+        Image(systemName: systemName)
+            .resizable()
+//            .frame(width: 25, height: 25)
+            .foregroundColor(color)
+    }
+}
+struct InfiniteScrollView: View {
+    @State var icons: [IconView] = [
+        IconView(color: .blue),
+        IconView(color: .red),
+        IconView(color: .green)
+    ]
 
+    @State private var visibles = [false, true, true]
+    @State private var processAnimation = false
+    private let transitions: [AnyTransition] = [
+        .move(edge: .leading).combined(with: .scale).combined(with: .opacity), // Для первой иконки
+        .move(edge: .trailing), // Для второй иконки
+        .move(edge: .trailing).combined(with: .scale).combined(with: .opacity) // Для третьей иконки
+    ]
+    
+    var body: some View {
+        Button(action: {
+            withAnimation {
+//                processAnimation.
+                self.shiftIcons()
+            }
+        }) {
+            HStack(spacing: 0) {
+                ForEach(icons.indices) { index in
+                    if self.visibles[index] {
+                        self.icons[index]
+                        
+                            .transition(self.transitions[index])
+                    }
+                }
+            }
+            .frame(width: 50, height: 30)
+            .border(Color.purple, width: 1.0)
+        }
+    }
+    
+    func shiftIcons() {
+        let lastIcon = icons.removeLast()
+        icons.insert(lastIcon, at: 0)
+    }
+}
+    
 #Preview {
     ContentView()
 }
